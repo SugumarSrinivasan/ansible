@@ -1,0 +1,51 @@
+---
+# tasks file for zookeeper
+
+     - name: "Downloading the zookeeper-{{ VERSION }} tar ball from official zookeeper repository."
+       shell: sudo wget -P {{ INSTALLATION_PATH }} https://archive.apache.org/dist/zookeeper/zookeeper-{{ VERSION }}/apache-zookeeper-{{ VERSION }}-bin.tar.gz
+
+     - name: "Extracting the zookeeper-{{ VERSION }} tar ball in {{ INSTALLATION_PATH }} path."
+       shell: sudo tar -xzf {{ INSTALLATION_PATH }}/apache-zookeeper-{{ VERSION }}-bin.tar.gz --directory {{ INSTALLATION_PATH }}
+
+     - name: "Renaming the zookeeper base directory."
+       shell: sudo mv {{ INSTALLATION_PATH }}/apache-zookeeper-{{ VERSION }}-bin {{ INSTALLATION_PATH }}/zookeeper
+
+     - name: "Creating the data directory for zookeeper."
+       shell: sudo mkdir {{ DATA_DIR }}
+
+     - name: "Updating the Zookeeper server id."
+       shell: sudo echo "1" > {{ DATA_DIR }}/myid
+
+         #     - name: "Creating the zoo.cfg file and adding the default configurations."
+         #shell: sudo echo -e "tickTime=2000\ninitLimit=10\nsyncLimit=5\ndataDir={{ DATA_DIR }}\nclientPort=2181" > {{ INSTALLATION_PATH }}/zookeeper/conf/zoo.cfg
+
+
+     - name: "Copying zoo.cfg to zookeeper server."
+       template:
+         src: templates/zoo_sample.cfg.j2
+         dest: "{{ INSTALLATION_PATH }}/zookeeper/conf/zoo.cfg"
+         owner: "{{ USER }}"
+         group: "{{ GROUP }}"
+         mode: '0644'
+
+     - name: "Changing the ownership of zookeeper base directory."
+       shell: sudo chown -R {{ USER }}:{{ GROUP }} {{ INSTALLATION_PATH }}/zookeeper
+
+     - name: "Copying zookeeper.service to zookeeper server."
+       template:
+         src: templates/zookeeper.service.j2
+         dest: /etc/systemd/system/zookeeper.service
+         owner: root
+         group: root
+         mode: '0644'
+
+     - name: "Enabling the zookeeper service and ensure it is not masked."
+       systemd:
+         name: zookeeper
+         enabled: yes
+         masked: no
+
+     - name: "Starting the zookeeper service."
+       systemd:
+         state: started
+         name: zookeeper

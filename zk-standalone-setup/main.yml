@@ -1,0 +1,30 @@
+---
+ - hosts: all
+   gather_facts: no
+   become: yes
+   vars_prompt:
+
+     - name: USER
+       prompt: Enter the ZK User
+       private: no
+
+     - name: GROUP
+       prompt: Enter the ZK Group
+       private: no
+
+     - name: VERSION
+       prompt: Enter the ZK Version 
+       private: no
+   
+     - name: INSTALLATION_PATH
+       prompt: Enter the ZK Installation Path
+       private: no
+
+     - name: DATA_DIR
+       prompt: Enter the ZK Data Directory
+       private: no
+   
+   tasks:
+     - name: zookeeper role
+       include_role:
+         name: zookeeper
